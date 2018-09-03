@@ -1,18 +1,17 @@
 !!! module for global parameters
-include "global_parameters.f90"
-include "subroutines.f90"
+!include "global_parameters.f90"
+!include "subroutines.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! MAIN
 program main
-use parameters
+use global_parameters
 use subroutines
 implicit none
 
 double precision, allocatable :: Xstar(:,:) ! Xstar(1:DIM, 1:NUM)
 double precision, allocatable :: Vstar(:,:) ! Vstar(1:DIM, 1:NUM)
-double precision, allocatable :: Astar1(:,:) ! Astar(1:DIM, 1:NUM)
-double precision, allocatable :: Astar2(:,:) ! Astar(1:DIM, 1:NUM)
+double precision, allocatable :: Astar(:,:) ! Astar(1:DIM, 1:NUM)
 
 double precision, allocatable :: Force(:,:) ! Force(1:DIM, 1:NUM)
 integer :: i,n,k
@@ -21,20 +20,20 @@ call set_parameters
 
 allocate( Xstar(1:DIM,1:NUM) )
 allocate( Vstar(1:DIM,1:NUM) )
-allocate( Astar1(1:DIM,1:NUM) )
-allocate( Astar2(1:DIM,1:NUM) )
+allocate( Astar(1:DIM,1:NUM) )
 allocate( Force(1:DIM,1:NUM) )
+
 call set_initial(Xstar,Vstar)
+call calc_force(Force,Xstar)
+do n=1,NUM
+  Astar(:,n)=Force(:,n)/Mass(n)
+enddo
 
 open(unit=XV_FILE, file=XV_FILE_NAME, status='replace', action='write')
-do k=1,Ntau
-  call calc_force(Force,Xstar)
-  do n=1,NUM
-    Astar1(:,n)=Force(:,n)/MASS(n)
-  enddo
-  time = time + deltaT
-  Xstar = Xstar + deltaT*Vstar
-  Vstar = Vstar + deltaT*Astar
+do k=0,Ntau-1
+  time=time+deltaT
+  !call time_evolution_1st(Xstar,Vstar)
+  call time_evolution_LeapFrog(Xstar,Vstar,Astar)
 
   write(XV_FILE,'(E15.8,2X)',advance='no') time 
   do n=1,NUM
@@ -59,6 +58,7 @@ write(FinalConfig_FILE) Vstar
 close(FinalConfig_FILE)
 
 call system('&
+  cd CONFIG; &
   FILE=$(ls lastconfig_* | tail -1); &
   LINK="lastconf"; if [ -e "$LINK" ]; then /bin/rm $LINK; &
   fi; ln -s $FILE $LINK')
@@ -66,5 +66,4 @@ call system('&
 
 end program main
 
-include "set_initial.f90"
 

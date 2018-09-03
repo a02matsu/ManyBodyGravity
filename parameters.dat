@@ -1,6 +1,7 @@
 3      ! DIM
-3      ! number of particles
+5      ! number of particles
 1d0    ! Newton constant G
-1d0    ! mass of particle 1
-1d0    ! mass of particle 2
-1d0    ! mass of particle 3
+3      ! number of particles with mass != 1.0 (default mass=1.0)
+1 1.0d0    ! mass of particle 1
+2 2.0d0    ! mass of particle 2
+3 3.0d0    ! mass of particle 3

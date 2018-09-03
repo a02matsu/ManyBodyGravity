@@ -8,7 +8,10 @@ subroutine set_parameters
 use global_parameters
 implicit none
 
-integer i
+integer SNUM
+integer i,n
+double precision s_mass
+
 
 !!!!! read parameter file !!!!
 open(PAR_FILE, file=PAR_FILE_NAME, status='old', action='READ')
@@ -16,9 +19,12 @@ open(PAR_FILE, file=PAR_FILE_NAME, status='old', action='READ')
 read(PAR_FILE,*) DIM
 read(PAR_FILE,*) NUM
 read(PAR_FILE,*) Grav
+read(PAR_FILE,*) SNUM
 allocate( MASS(1:NUM) )
-do i=1,NUM
-  read(PAR_FILE,*) MASS(i)
+MASS=1d0
+do i=1,SNUM
+  read(PAR_FILE,*) n, s_mass
+  MASS(n)=s_mass
 enddo
 
 close(PAR_FILE)
